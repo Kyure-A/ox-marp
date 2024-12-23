@@ -1,0 +1,9 @@
+[[https://github.com/Kyure-A/el-project][https://img.shields.io/github/tag/Kyure-A/ox-marp.svg?style=flat-square]]
+[[file:LICENSE][https://img.shields.io/github/license/Kyure-A/ox-marp.svg?style=flat-square]]
+[[https://codecov.io/gh/Kyure-A/el-project?branch=master][https://img.shields.io/codecov/c/github/Kyure-A/ox-marp.svg?style=flat-square]]
+[[https://github.com/Kyure-A/el-project/actions][https://img.shields.io/github/actions/workflow/status/Kyure-A/ox-marp/test.yml.svg?branch=master&style=flat-square]]
+* ox-marp: Org export engine for marp
+
+* Usage
+* License
+This package is licensed by The GNU General Public License verson 3 or later. See [[file:LICENSE][LICENSE]].
