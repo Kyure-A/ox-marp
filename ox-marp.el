@@ -56,7 +56,7 @@
                                                       (example-block . org-marp-example-block)))
 
 (defun org-marp-template (contents info)
-  "Marp 用のヘッダーと CONTENTS を結合して返す."
+  "Concat marp header and CONTENTS."
   (let ((theme (plist-get info :marp-theme))
         (paginate (plist-get info :marp-paginate))
         (heading-divider (plist-get info :marp-heading-divider)))
@@ -69,7 +69,7 @@
      contents)))
 
 (defun org-marp-headline (headline contents info)
-  "HEADLINE を Marp 用スライド形式に変換"
+  "Convert HEADLINE to marp syntax."
   (let* ((level (org-export-get-relative-level headline info))
          (title (org-export-data (org-element-property :title headline) info))
          (hashes (make-string level ?#))) ;; 見出しレベルに応じた '#' を生成
@@ -79,7 +79,7 @@
 
 ;; リンクを Markdown の形式に変換
 (defun org-marp-link (link description info)
-  "LINK を Markdown のリンク形式に変換"
+  "Convert LINK to markdown syntax."
   (let ((url (org-element-property :raw-link link))
         (link-type (org-element-property :type link)))
     (if (equal link-type "file")
@@ -88,27 +88,26 @@
 
 ;; ソースコードブロックを Marp のコードブロックに変換
 (defun org-marp-src-block (src-block contents info)
-  "SRC-BLOCK を Markdown のコードフェンス形式に変換"
+  "Convert SRC-BLOCK to markdown syntax."
   (let ((lang (org-element-property :language src-block))
         (value (org-element-property :value src-block)))
     (format "```%s\n%s\n```\n" (or lang "") value)))
 
 ;; 実例ブロックをそのままコードフェンスで囲む
 (defun org-marp-example-block (example-block contents info)
-  "EXAMPLE-BLOCK を Markdown のコードフェンス形式に変換"
+  "Convert EXAMPLE-BLOCK to markdown syntax."
   (let ((value (org-element-property :value example-block)))
     (format "```\n%s\n```\n" value)))
 
-;; エクスポート用の関数
 (defun org-marp-export-to-file (&optional async subtreep visible-only body-only ext-plist)
-  "現在の Org バッファを Marp 用 Markdown ファイルにエクスポート"
+  "Export current org-mode buffer to markdown file for marp."
   (interactive)
   (let ((outfile (org-export-output-file-name ".md" subtreep)))
     (org-export-to-file 'marp outfile
-                        async subtreep visible-only body-only ext-plist)))
+      async subtreep visible-only body-only ext-plist)))
 
 (defun org-marp-export-to-file-and-open (&optional async subtreep visible-only body-only ext-plist)
-  "現在の Org バッファを Marp 用 Markdown ファイルにエクスポートし開く"
+  "Export and open current org-mode buffer to markdown file for marp."
   (interactive)
   (let ((outfile (org-marp-export-to-file async subtreep visible-only body-only ext-plist)))
     (when outfile
