@@ -30,55 +30,61 @@
 
 ;;; Code:
 
-(require 'ox)
+(require 'ox-md)
 
 (defgroup org-export-marp ()
-  "Org export engine for marp"
+  "Org export engine for marp."
   :group 'tools
   :prefix "org-marp-"
   :link '(url-link "https://github.com/Kyure-A/ox-marp"))
 
 (defconst org-marp-options-alist
   '((:marp-theme "MARPTHEME" nil nil t)
-    (:marp-paginate "MARPPAGINATE" nil nil t)))
+    (:marp-paginate "MARPPAGINATE" nil nil t)
+    (:marp-heading-divider "MARPHEADINGDIVIDER" nil nil t)))
 
 (org-export-define-derived-backend 'marp 'md
-  :menu-entry
-  '(?M "Export to Marp"
-       ((?m "To file" org-marp-export-to-file)
-        (?p "To file and open" org-marp-export-to-file-and-open)))
-  :options-alist org-marp-options-alist
-  :translate-alist '((template . org-marp-template)
-                     (headline . org-marp-headline)
-                     (link . org-marp-link)
-                     (src-block . org-marp-src-block)
-                     (example-block . org-marp-example-block)))
+                                   :menu-entry
+                                   '(?M "Export to Marp"
+                                        ((?m "To file" org-marp-export-to-file)
+                                         (?p "To file and open" org-marp-export-to-file-and-open)))
+                                   :options-alist org-marp-options-alist
+                                   :translate-alist '((template . org-marp-template)
+                                                      (headline . org-marp-headline)
+                                                      (link . org-marp-link)
+                                                      (src-block . org-marp-src-block)
+                                                      (example-block . org-marp-example-block)))
 
 (defun org-marp-template (contents info)
   "Marp 用のヘッダーと CONTENTS を結合して返す."
   (let ((theme (plist-get info :marp-theme))
-        (paginate (plist-get info :marp-paginate)))
+        (paginate (plist-get info :marp-paginate))
+        (heading-divider (plist-get info :marp-heading-divider)))
     (concat
      "---\n"
      (when theme (format "theme: %s\n" theme))
      (when paginate "paginate: true\n")
+     (when heading-divider (format "headingDivider: %s\n" heading-divider))
      "---\n\n"
      contents)))
 
-;; 見出しをスライド区切りに対応させる
 (defun org-marp-headline (headline contents info)
   "HEADLINE を Marp 用スライド形式に変換"
-  (let ((title (org-export-data (org-element-property :title headline) info)))
+  (let* ((level (org-export-get-relative-level headline info))
+         (title (org-export-data (org-element-property :title headline) info))
+         (hashes (make-string level ?#))) ;; 見出しレベルに応じた '#' を生成
     (concat
-     (format "# %s\n" title)
-     "---\n"
+     (format "%s %s\n" hashes title)
      contents)))
 
 ;; リンクを Markdown の形式に変換
-(defun org-marp-link (link desc info)
+(defun org-marp-link (link description info)
   "LINK を Markdown のリンク形式に変換"
-  (let ((url (org-element-property :raw-link link)))
-    (format "[%s](%s)" (or desc url) url)))
+  (let ((url (org-element-property :raw-link link))
+        (link-type (org-element-property :type link)))
+    (if (equal link-type "file")
+        (format "![%s](%s)" (or description url) url)
+      (format "[%s](%s)" (or description url) url))))
 
 ;; ソースコードブロックを Marp のコードブロックに変換
 (defun org-marp-src-block (src-block contents info)
@@ -99,7 +105,7 @@
   (interactive)
   (let ((outfile (org-export-output-file-name ".md" subtreep)))
     (org-export-to-file 'marp outfile
-      async subtreep visible-only body-only ext-plist)))
+                        async subtreep visible-only body-only ext-plist)))
 
 (defun org-marp-export-to-file-and-open (&optional async subtreep visible-only body-only ext-plist)
   "現在の Org バッファを Marp 用 Markdown ファイルにエクスポートし開く"
